@@ -36,6 +36,22 @@ class BaseProcessor(ABC):
         """Get the account ID for API calls."""
         pass
     
+    def get_company_id(self) -> Optional[str]:
+        """Get the first company ID for API calls that require it."""
+        try:
+            # Try to get the first company from the companies endpoint
+            from processors.generic_processor import CompaniesProcessor
+            companies_processor = CompaniesProcessor(self.client, self.get_account_id())
+            
+            # Fetch just one company
+            companies = companies_processor.fetch_batch(0, 1)
+            if companies and len(companies) > 0:
+                return companies[0].get('id')
+        except Exception as e:
+            logger.warning(f"Could not get company_id: {str(e)}")
+        
+        return None
+    
     def process_endpoint(self, limit: Optional[int] = None, 
                         batch_size: Optional[int] = None) -> Dict[str, Any]:
         """Process the entire endpoint and save to CSV."""
@@ -193,10 +209,18 @@ class BaseProcessor(ABC):
                 params['page'] = (offset // limit) + 1
             params['per_page'] = min(limit, self.endpoint_config.max_per_page)
         
-        # Add field selection
-        all_fields = endpoint_registry.get_all_fields(self.endpoint_name)
-        if all_fields:
-            params['fields'] = ','.join(all_fields)
+        # Add company_id if required
+        if self.endpoint_config.requires_company_id:
+            company_id = self.get_company_id()
+            if company_id:
+                params['company_id'] = company_id
+        
+        # Add field selection (skip for problematic endpoints)
+        skip_fields = ['tags', 'text_messages', 'outbound_caller_ids']
+        if self.endpoint_name not in skip_fields:
+            all_fields = endpoint_registry.get_all_fields(self.endpoint_name)
+            if all_fields:
+                params['fields'] = ','.join(all_fields)
         
         return params
     
