@@ -1,0 +1,2 @@
+id,name,status,time_zone,created_at,disabled_at,dni_active,script_url,callscore_enabled,lead_scoring_enabled,swap_exclude_jquery,swap_ppc_override,swap_landing_override,swap_cookie_duration,swap_cookie_duration_unit,callscribe_enabled,keyword_spotting_enabled,form_capture,verified_caller_ids,masked_id
+COM8fa5552638174c33bd47ee9d47df3bb0,Home Genius Exteriors,active,America/New_York,2021-11-16T18:47:46.411Z,,True,//cdn.callrail.com/companies/292110098/92217f11da405ecb4591/12/swap.js,False,True,,,,6,months,True,True,False,,292110098
